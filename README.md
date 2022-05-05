@@ -1,6 +1,6 @@
 <!-- <img src="/logos/BinaryBodyLogo.png" alt="BinaryBodyLogo" title="BinaryBodyLogo" style="width: 500px; height: 500px;"> -->
 
-<p align = "center"
+<p align = "center">
   <img src="/logos/BinaryBodyLogo.png" alt="BinaryBodyLogo" title="BinaryBodyLogo" style="width: 200px; height: 200px;">
 </p>
 
