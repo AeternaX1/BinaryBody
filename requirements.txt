@@ -1,0 +1,5 @@
+gprof2dot==2021.2.21
+numpy==1.22.3
+psutil==5.9.0
+snakeviz==2.1.1
+tornado==6.1
