@@ -1,9 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import timeit
-import threading
-import math
 from subprocess import Popen
+import numpy as np
+import timeit
+import math
+import psutil
+import cProfile
 
 
 """
@@ -68,67 +68,80 @@ def get_acceleration(position, mass, G, softening):
 
     return acceleration
 
+if __name__ == '__main__':
+    """
+    Simulation Parameters
+    """
 
-"""
-Simulation Parameters
-"""
+    print("********************************************************")
+    print(" ____  _                        ____            _       ")
+    print("|  _ \(_)                      |  _ \          | |      ") 
+    print("| |_) |_ _ __   __ _ _ __ _   _| |_) | ___   __| |_   _ ")
+    print("|  _ <| | '_ \ / _` | '__| | | |  _ < / _ \ / _` | | | |")
+    print("| |_) | | | | | (_| | |  | |_| | |_) | (_) | (_| | |_| |")
+    print("|____/|_|_| |_|\__,_|_|   \__, |____/ \___/ \__,_|\__, |")
+    print("                           __/ |                   __/ |")
+    print("                          |___/                   |___/ ")
+    print("********************************************************\n")
 
-print("*****************************************")
-print("BinaryBody - Pairwise Interaction")
-print("*****************************************")
+    print("********************************************************")
+    print("Pairwise Interaction")
+    print("********************************************************\n")
 
-# Number of bodies
-number_of_bodies = int(input("Enter the number of bodies: "))
-# number_of_bodies = 100
+    # Number of bodies
+    number_of_bodies = int(input("Enter the number of bodies: "))
 
-# Timestep
-timestep = 0.01   
+    # Timestep
+    timestep = 0.01   
 
-# Softening length
-softening = 0.1  
+    # Softening length
+    softening = 0.1  
 
-# Newton's Gravitational Constant
-G = 6.67 / 1e11  
+    # Newton's Gravitational Constant
+    G = 6.67 / 1e11   
 
-# Switch on for live plotting animation
-live_plot = True   
+    # Generate Initial Conditions; set the random number generator seed
+    np.random.seed(50)  
 
-# Generate Initial Conditions; set the random number generator seed
-np.random.seed(50)  
+    # Each body has a mass of 10. 
+    # This can be changed for different gravitational effects
+    mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
 
-# Each body has a mass of 10. 
-# This can be changed for different gravitational effects
-mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
+    # Determine positions and velocities at random
+    position = np.random.randn(number_of_bodies, 3)  
+    velocity = np.random.randn(number_of_bodies, 3)
 
-# Determine positions and velocities at random
-position = np.random.randn(number_of_bodies, 3)  
-velocity = np.random.randn(number_of_bodies, 3)
+    # Convert to Center-of-Mass frame
+    velocity -= np.mean(mass * velocity,0) / np.mean(mass)
 
-# Convert to Center-of-Mass frame
-velocity -= np.mean(mass * velocity,0) / np.mean(mass)
+    # Calculate initial gravitational accelerations
+    acceleration = get_acceleration(position, mass, G, softening)
 
-# Calculate initial gravitational accelerations
-acceleration = get_acceleration(position, mass, G, softening)
+    # Number of timesteps
+    number_of_timesteps = 100
 
-# Number of timesteps
-# number_of_timesteps = int(simulation_end / timestep)
-number_of_timesteps = 100
+    # Simulation Main Loop
+    for i in range(number_of_timesteps):
+        # Half timestep kick
+        velocity += acceleration * timestep / 2.0
 
-# Simulation Main Loop
-for i in range(number_of_timesteps):
-    # Half timestep kick
-    velocity += acceleration * timestep / 2.0
+        # Full timestep drift
+        position += velocity * timestep
+        
+        # Half timestep kick
+        velocity += acceleration * timestep / 2.0
 
-    # Full timestep drift
-    position += velocity * timestep
-    
-    # Half timestep kick
-    velocity += acceleration * timestep / 2.0
+    # Initialise
+    print("\nRunning...")
 
-# Time the algorithm
-result = timeit.timeit(lambda: get_acceleration(position, mass, G, softening), number=1)
-# result = timeit.timeit(lambda: pairwise_loop(), number=1)
-print("\nRunning...")
-print("The time taken to run the Pairwise Interaction simulation with", number_of_bodies, "bodies is: ")
-print(result, "s")
-input()
+    # Time the algorithm
+    result = timeit.timeit(lambda: get_acceleration(position, mass, G, softening), number=1)
+    print("The time taken to run the Pairwise Interaction simulation with", number_of_bodies, "bodies is: ")
+    print(result, "s")
+
+    # Record function calls
+    cProfile.run("get_acceleration(position, mass, G, softening)")
+
+    # System CPU usage
+    print("The overall system CPU usage is : ", psutil.cpu_percent())
+    input("Press ENTER to exit")
