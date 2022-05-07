@@ -18,15 +18,6 @@
 </p>
 
 <p>
-    ____  _                        ____            _       <br>
-  |  _ \(_)                      |  _ \          | |      <br>
-  | |_) |_ _ __   __ _ _ __ _   _| |_) | ___   __| |_   _ <br>
-  |  _ <| | '_ \ / _` | '__| | | |  _ < / _ \ / _` | | | |<br>
-  | |_) | | | | | (_| | |  | |_| | |_) | (_) | (_| | |_| |<br>
-  |____/|_|_| |_|\__,_|_|   \__, |____/ \___/ \__,_|\__, |<br>
-                              __/ |                   __/ |<br>
-                            |___/                   |___/ <br>
-<br>
   BinaryBody is an N-body simulation comparison application forming the basis of my final year Honours project.<br>
   The application is built in Python, is CLI-based and allows the user to compare a naive Pairwise Interaction Algorithm and <br>
   Barnes-Hut Quadtree against one another.<br>
@@ -50,9 +41,9 @@
   When the Pairwise or Barnes-Hut simulations are executed, once the user has entered the number of bodies, the program will display how long it has taken that particular simulation to run in it's entirety, with the specified number of bodies, as well as how long it has spent on each section/function. <br>
   within that script. Once this has been done, the program will close. <br>
 
-  If the user wishes to run another simulation, they will need to execute main.py.<br><br>
+  If the user wishes to run another simulation, they will need to execute main.py.<br>
 
-  Once the user is done, execute main.py again and select option "3" to deactivate the virtual environment (venv). <br><br>
+  Once the user is done, execute main.py again and select option "3" to deactivate the virtual environment (venv). <br>
 
   While main.py needs to be executed every time the user wants to run a new simulation, which activates the virtual environment (venv), as well as when they want to deactivate the virtual environment (venv), this is to avoid using "while(1)" to keep the script active. <br>
   This is because it is not advisable to use it in real-world scenarios because it increases the CPU usage while also potentially blocking the code.<br>
