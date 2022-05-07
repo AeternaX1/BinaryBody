@@ -6,7 +6,7 @@
 
 <p>
   BinaryBody is an N-body simulation comparison application forming the basis of my final year Honours project. 
-  The application is built in Python, is CLI-based and allows the user to compare a naive Pairwise Interaction Algorithm and Barnes-Hut Quadtree against one another. The number of bodies can be entered by the user via a prompt. This applies to both simulations.
+  The application is built in Python 3.9, is CLI-based and allows the user to compare a naive Pairwise Interaction Algorithm and Barnes-Hut Quadtree against one another. The number of bodies can be entered by the user via a prompt. This applies to both simulations.
 </p>
 
 ## GET STARTED
