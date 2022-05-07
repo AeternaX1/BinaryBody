@@ -16,8 +16,7 @@
   ### RUN YOUR FIRST SIMULATION
   Run "main.py"
 
-  If main.py is running into any issues regarding libraries, you may need to install them from "requirements.txt".
-  This can be done via the following:
+  If main.py is running into any issues regarding the libraries installed to the venv, you may need to re-install them from "requirements.txt". This can be done via the following:
 
   Install libraries from requirements.txt<br>
     - pip install -r requirements.txt <br>
@@ -25,7 +24,10 @@
     - pip3 install -r requirements.txt<br>
   
   ### CHOOSE YOUR SIMULATION
-  When this is done, you can choose to run either the Pairwise Algorithm simulation, by selection option "1" or Barnes-Hut Quadtree simulation by selecting option "2".
+  When this is done, you can choose to run either: 
+  The Pairwise Algorithm simulation, by selection option "1"
+  OR 
+  The Barnes-Hut Quadtree simulation by selecting option "2"
 
   ### VENV ACTIVATION
   Both simulations when executed will activate the virtual environment (venv) contained within "venv/Scripts/activate.bat"
@@ -35,7 +37,7 @@
   The user will then be prompted to enter the number of bodies to insert into the sim. The program will display how long it has taken that particular simulation to run in it's entirety, with the specified number of bodies, as well as how long it has spent on each section/function within that script. Once this has been done, the program will close.
 
   ### RUNNING A NEW SIMULATION
-  If the user wishes to run another simulation, they will need to execute main.py.
+  If the user wishes to run another simulation, they will need to execute main.py again.
   
   ### DEACTIVATE VENV
   Once the user is done, execute main.py again and select option "3" to deactivate the virtual environment (venv).
