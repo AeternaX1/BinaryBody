@@ -3,7 +3,9 @@ import numpy as np
 import timeit
 import psutil
 import cProfile
+import threading
 import time
+
 
 """
 Barnes-Hut Algorithm
@@ -111,23 +113,25 @@ def force_on(body, node, theta):
 
 # Verlet algorithm
 # More efficient method of calculating velocity
-def verlet(bodies, root, theta, G, timestep):
+def verlet(bodies, root, theta, G, change_in_time):
     for body in bodies:
         force = G * force_on(body, root, theta)
-        body.momentum += timestep * force
-        body.pos += timestep * body.momentum / body.mass
+        body.momentum += change_in_time * force
+        body.pos += change_in_time * body.momentum / body.mass
 
 
-# One simulation cycle
-def model_step(bodies, theta, g, step):
+# One simulation cycle/single timestep
+def model_step(bodies, theta, g, change_in_time):
     root = None
     for body in bodies:
         body.quadrant_reposition()
         root = add_body(body, root)
-    verlet(bodies, root, theta, g, step)
+    verlet(bodies, root, theta, g, change_in_time)
 
 
 # ********************************************************************************************
+
+start = time.perf_counter()
 
 """ 
 Simulation Parameters
@@ -144,14 +148,14 @@ print("                          |___/                   |___/ ")
 print("********************************************************\n")
 
 print("********************************************************")
-print("Unthreaded Barnes-Hut Quadtree")
+print("Barnes-Hut Quadtree")
 print("********************************************************\n")
 
 # Number of bodies
 print("*****************")
 print("Simulation bodies")
 print("*****************")
-print("Here, the number of bodies you wish to insert into the simulation can be determined.")
+print("Here, the number of bodies you wish to insert into the simualtion can be determined.")
 number_of_bodies = int(input("\nEnter the number of bodies: "))
 
 # Number of timesteps
@@ -160,7 +164,7 @@ print("\n\n*******************")
 print("Timestep definition")
 print("*******************")
 print("This is the fixed amount of time by which the simulation advances")
-number_of_timesteps = int(input("\nEnter the number of timesteps: "))
+number_of_timesteps = int(input("\nEnter the number of timesteps:"))
 
 # Theta parameter
 # This determines what is considered short and long range
@@ -177,7 +181,7 @@ G = 6.67 / 1e11
 # Change in time between frames/simulation cycles (Delta time)
 # Delta time describes the time difference between the previous frame that was drawn 
 # and the current frame
-timestep = 0.01
+change_in_time = 0.01
 
 # Random seed
 np.random.seed(50)
@@ -190,7 +194,7 @@ np.random.seed(50)
 # Keeps things fair
 # Mass property of body, multiplied by number of bodies specified by user
 # mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
-mass = np.random.random(number_of_bodies)*10
+mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
 
 # Random x coordinate, multiply random x cooridinates by number of bodies specified by user
 X0 = np.random.random(number_of_bodies)
@@ -204,6 +208,7 @@ PX0 = np.random.random(number_of_bodies) - 0.5
 # Random y momentum coordinate
 PY0 = np.random.random(number_of_bodies) - 0.5
 
+
 # Create array of bodies
 # An array of bodies which have a positional x,y coordinate, momentum x, coordinate, and mass
 Bodies = [
@@ -215,21 +220,37 @@ Bodies = [
     for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, PX0, PY0, mass)
 ]
 
-print("\nSimulating body movements...")
-
+# Main Model Loop for Barnes Hut
 # Loop the function for one simulation cycle, for a number of iterations equal to the number of timesteps
 def barnes_hut_simulation_loop(number_of_timesteps):
-    for i in range(number_of_timesteps):
-        model_step(Bodies, theta, G, timestep)
+    # Create a number of threads equal to the number of timesteps
+    threads = []
 
-print("\nCalculations complete...")
-print("\nPlease wait...")
-print("\n")
+    for i in range(number_of_timesteps):
+        t1 = threading.Thread(target=model_step, args=(Bodies, theta, G, change_in_time))
+        threads.append(i)
+        t1.start()
+        model_step(Bodies, theta, G, change_in_time)
+    
+    # Active threads
+    print(f'Active Threads: {threading.active_count()}')
+    
+    for t in threads:
+        t1.join()
+
+
+end = time.perf_counter()
+
+# Initialise
+print("\nRunning...")
 
 # Time the simulation
 result = timeit.timeit(lambda: barnes_hut_simulation_loop(number_of_timesteps), number=1)
 print("The time taken to run the Barnes-Hut Algorithm simulation with", number_of_bodies, "bodies is:")
 print(result, "s")
+
+# Entire program execution time
+print(f"\n\nThe time taken to execute the entire program is {round(end-start, 2)} second(s)") 
 
 # Record function calls
 print("\n\n")
@@ -238,4 +259,3 @@ cProfile.run("barnes_hut_simulation_loop(number_of_timesteps)")
 # System CPU usage
 print("The overall system CPU usage is : ", psutil.cpu_percent())
 input("Press ENTER to exit")
-input()

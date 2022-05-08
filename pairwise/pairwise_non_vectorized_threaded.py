@@ -4,6 +4,7 @@ import timeit
 import math
 import psutil
 import cProfile
+import threading
 import time
 
 
@@ -69,10 +70,10 @@ def get_acceleration(position, mass, G, softening):
 
     return acceleration
 
-
 """
 Simulation Parameters
 """
+start = time.perf_counter()
 
 print("********************************************************")
 print(" ____  _                        ____            _       ")
@@ -86,7 +87,7 @@ print("                          |___/                   |___/ ")
 print("********************************************************\n")
 
 print("********************************************************")
-print("Unthreaded Pairwise Interaction")
+print("Threaded Pairwise Interaction")
 print("********************************************************\n")
 
 # Number of bodies
@@ -106,9 +107,7 @@ print("This is the fixed amount of time by which the simulation advances")
 number_of_timesteps = int(input("\nEnter the number of timesteps: "))
 # number_of_timesteps = 100
 
-# Timestep is the change in time between frames/simulation cycles (Delta time)
-# Delta time describes the time difference between the previous frame that was drawn 
-# and the current frame
+# Timestep
 timestep = 0.01   
 
 # Softening length
@@ -120,7 +119,7 @@ G = 6.67 / 1e11
 # Generate Initial Conditions; set the random number generator seed
 np.random.seed(50)  
 
-# Each body has a mass of 100
+# Each body has a mass of 10. 
 # This can be changed for different gravitational effects
 mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
 
@@ -129,15 +128,26 @@ position = np.random.randn(number_of_bodies, 3)
 velocity = np.random.randn(number_of_bodies, 3)
 
 # Convert to Center-of-Mass frame
-velocity -= np.mean(mass * velocity,0) / np.mean(mass)
+velocity = velocity - np.mean(mass * velocity,0) / np.mean(mass)
 
 # Calculate initial gravitational accelerations
 acceleration = get_acceleration(position, mass, G, softening)
+
+# Create a number of threads equal to the number of timesteps.
+# Threads will be stored in this list to avoid start and joining every thread manually
+# If threads were not stored in this way, problem could occur with larger simulations that contain
+# more bodies
+threads = []
 
 print("\nSimulating body movements...")
 
 # Simulation Main Loop
 for i in range(number_of_timesteps):
+    # Create and Start Thread
+    t1 = threading.Thread(target=get_acceleration, args=(position, mass, G, softening))
+    threads.append(t1)
+    t1.start()
+
     # Half timestep kick
     velocity += acceleration * timestep / 2.0
 
@@ -146,6 +156,13 @@ for i in range(number_of_timesteps):
     
     # Half timestep kick
     velocity += acceleration * timestep / 2.0
+
+# Active threads
+print(f'Active Threads: {threading.active_count()}')
+
+# Join all threads with main thread
+for t in threads:
+    t1.join()
 
 print("\nCalculations complete...")
 print("\nPlease wait...")
@@ -156,11 +173,11 @@ result = timeit.timeit(lambda: get_acceleration(position, mass, G, softening), n
 print("The time taken to run the Pairwise Interaction simulation with", number_of_bodies, "bodies is: ")
 print(result, "s")
 
-# Record function calls
-print("\n")
-cProfile.run("get_acceleration(position, mass, G, softening)")
+# # Record function calls
+# print("\n")
+# cProfile.run("get_acceleration(position, mass, G, softening)")
 
-# System CPU usage
-print("The overall system CPU usage is : ", psutil.cpu_percent())
-input("Press ENTER to exit")
+# # System CPU usage
+# print("The overall system CPU usage is : ", psutil.cpu_percent())
+# input("Press ENTER to exit")
 input()
