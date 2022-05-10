@@ -24,11 +24,11 @@
     - pip3 install -r requirements.txt<br>
   
   ### CHOOSE YOUR SIMULATION
-  When this is done, you can choose to run either the: 
-  UNTHREADED Pairwise Algorithm simulation, by selection option "1"
-  THREADED Pairwise Algorithm simulation, by selection option "2"
-  UNTHREADED Barnes-Hut Quadtree simulation by selecting option "3"
-  THREADED Barnes-Hut Quadtree simulation by selecting option "4"
+  When this is done, you can choose to run either the:<br>
+  UNTHREADED Pairwise Algorithm simulation, by selection option "1"<br>
+  THREADED Pairwise Algorithm simulation, by selection option "2"<br>
+  UNTHREADED Barnes-Hut Quadtree simulation by selecting option "3"<br>
+  THREADED Barnes-Hut Quadtree simulation by selecting option "4"<br>
 
   ### VENV ACTIVATION
   Both simulations when executed will activate the virtual environment (venv) contained within "venv/Scripts/activate.bat"
