@@ -46,6 +46,9 @@ Newton's Law of Universal Gravitation
 # THE PAIRWISE ALGORITHM USED HERE IS INSPIRED BY THE WORK OF PHILIP MOCZ
 # https://github.com/pmocz/nbody-python
 
+# THIS CODE FOLLOWS THE PRINCIPLES SET OUT BY PEP8
+# https://peps.python.org/pep-0008/
+
 
 def get_acceleration(position, mass, G, softening):
     # Give dimensions of the array
@@ -194,7 +197,7 @@ result = timeit.timeit(
     number=1)
 
 print(
-    "The execution time of the UNTHREADED Pairwise simulation with",
+    "The execution time of the THREADED Pairwise simulation with",
     number_of_bodies, "bodies is: ", result, "s"
     )
 
