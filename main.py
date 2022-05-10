@@ -3,12 +3,12 @@ import os
 import time
 
 
-# Python doesn't have a native clear function, so we need to define one and then call it
+# Python doesn't have a native clear function
+# we need to define one and then call it
 def clear():
     # For Windows systems
     if os.name == "nt":
         _ = os.system("cls")
-  
     # For Mac and Linux(here, os.name is 'posix')
     else:
         _ = os.system("clear")
@@ -16,7 +16,7 @@ def clear():
 
 print("********************************************************")
 print(" ____  _                        ____            _       ")
-print("|  _ \(_)                      |  _ \          | |      ") 
+print("|  _ \(_)                      |  _ \          | |      ")
 print("| |_) |_ _ __   __ _ _ __ _   _| |_) | ___   __| |_   _ ")
 print("|  _ <| | '_ \ / _` | '__| | | |  _ < / _ \ / _` | | | |")
 print("| |_) | | | | | (_| | |  | |_| | |_) | (_) | (_| | |_| |")
@@ -30,10 +30,9 @@ print("Press '1' to execute the UNTHREADED Pairwise Force Algorithm.")
 print("Press '2' to execute the THREADED Pairwise Force Algorithm.")
 print("Press '3' to execute the UNTHREADED Barnes-Hut Tree Algorithm.")
 print("Press '4' to execute the THREADED Barnes-Hut Tree Algorithm.")
-print("Press '5' to exit the application and kill the virtual environment.\n\n")
+print("Press '5' to exit and the virtual environment.\n\n")
 
-option = int(input("Enter your choice: ")) 
-
+option = int(input("Enter your choice: "))
 if option == 1:
     clear()
     print("********************************************************")
@@ -82,5 +81,3 @@ elif option == 5:
 
 else:
     print("Please enter a valid option")
-
-

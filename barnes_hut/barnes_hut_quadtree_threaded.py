@@ -197,29 +197,29 @@ np.random.seed(50)
 # Keeps things fair
 # Mass property of body, multiplied by number of bodies specified by user
 # mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
-mass = np.random.random(number_of_bodies)*10
+mass = np.random.random(number_of_bodies) * 10
 
 # Random x coordinate, multiply random x cooridinates by number of bodies specified by user
-X0 = np.random.random(number_of_bodies)
+random_x = np.random.random(number_of_bodies)
 
 # Random y coordinate, multiply random x cooridinates by number of bodies specified by user  
-Y0 = np.random.random(number_of_bodies)
+random_y = np.random.random(number_of_bodies)
 
 # Random x momentum coordinate
-momentum_PX0 = np.random.random(number_of_bodies) - 0.5
+random_x_momentum = np.random.random(number_of_bodies) - 0.5
 
 # Random y momentum coordinate
-momentum_PY0 = np.random.random(number_of_bodies) - 0.5
+random_y_momentum = np.random.random(number_of_bodies) - 0.5
 
-# Create array of bodies
+# Create array/list of bodies
 # An array of bodies which have a positional x,y coordinate, momentum x, coordinate, and mass
 Bodies = [
     node(x0, y0, pX0, pY0, mass) 
-    # Zip function used to iterate through a tuple; an unchangable ordered list
+    # Zip functions are used to iterate through a tuple; an unchangable ordered list
     # List of iterables which are collected into a tuple, and returned
     # This will be multiplied by the number of bodies, as specified when defining the properties of each body
     # COULD MAYBE JUST MULTIPLY THE ENTIRE TUPLE BY NUMBER OF BODIES, although may break script??
-    for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, momentum_PX0, momentum_PY0, mass)
+    for (x0, y0, pX0, pY0, mass) in zip(random_x, random_y, random_x_momentum, random_y_momentum, mass)
 ]
 
 
