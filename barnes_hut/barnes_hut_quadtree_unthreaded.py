@@ -5,6 +5,7 @@ import psutil
 import cProfile
 import time
 
+
 """
 Barnes-Hut Algorithm
 3 steps
@@ -13,11 +14,13 @@ Barnes-Hut Algorithm
 3. Numerically integrate using your algorithm of choice. (Velocity Verlet, Euler, whatever.)
 """
 
+# THE QUADTREE USED HERE IS INSPIRED BY THE WORK OF LEWIS COLE
+# https://lewiscoleblog.com/barnes-hut
 
-# Quadtree node constructor
-# A class for a node within the quadtree.
+
+# Quadtree node constructor - A class for a node within the quadtree.
 # We use the terminology "subnode" for nodes in the next quadtree depth level
-# If a node is "childless" then it represents a body
+# If a node is contains no subnodes (children), then it represents a body
 class node:
     def __init__(self, x, y, x_momentum, y_momentum, mass):
         """
@@ -26,14 +29,14 @@ class node:
         y - y-coordinate for centre of mass of noce
         x_momentum - x- coordinate of momentum, acceleration along x-coordinate
         y_momentum - y-coordinate of momentum, acceleration along y-coordinate
-        pos - centre of mass array
+        com_array - centre of mass array; array containing center of masses
         momentum - momentum array; array of momentums of all bodies. Momentum is a measurement of mass in motion
         subnode - child node
         side - side-length (depth=0 side=1)
         relative_position = relative position
         """
         self.mass = mass
-        self.pos = np.array([x,y])
+        self.com_array = np.array([x,y])
         self.momentum = np.array([x_momentum,y_momentum])
         self.subnode = None
     
@@ -59,19 +62,19 @@ class node:
     # Goes back to full space / whole area
     def quadrant_reposition(self):
         self.side = 1.0
-        self.relative_position = self.pos.copy()
+        self.relative_position = self.com_array.copy()
         
 
     # Calculates distance between node and another node
     def node_distance(self, other):
-        return np.linalg.norm(self.pos - other.pos)
+        return np.linalg.norm(self.com_array - other.com_array)
     
 
     # Force applied from current node to other node
     # This is the center of mass of the entire cluster of bodies within the node
     def applied_force_current_node(self, other):
             d = self.node_distance(other)
-            return (self.pos - other.pos) * (self.mass * other.mass / d**3)
+            return (self.com_array - other.com_array) * (self.mass * other.mass / d**3)
         
 
 # Adds body to a node of quadtree. 
@@ -93,7 +96,7 @@ def add_body(body, node):
             new_node = node
 
         new_node.mass += body.mass
-        new_node.pos += body.pos
+        new_node.com_array += body.com_array
         quad = body.quadrant_next_node()
         new_node.subnode[quad] = add_body(body, new_node.subnode[quad])
     return new_node
@@ -115,11 +118,11 @@ def verlet(bodies, root, theta, G, timestep):
     for body in bodies:
         force = G * force_on(body, root, theta)
         body.momentum += timestep * force
-        body.pos += timestep * body.momentum / body.mass
+        body.com_array += timestep * body.momentum / body.mass
 
 
 # One simulation cycle
-def model_step(bodies, theta, g, step):
+def single_timestep_cycle(bodies, theta, g, step):
     root = None
     for body in bodies:
         body.quadrant_reposition()
@@ -128,10 +131,10 @@ def model_step(bodies, theta, g, step):
 
 
 # ********************************************************************************************
+# MAIN CODE
 
-""" 
-Simulation Parameters
-"""
+# SIMULATION PARAMETERS
+
 print("********************************************************")
 print(" ____  _                        ____            _       ")
 print("|  _ \(_)                      |  _ \          | |      ") 
@@ -144,7 +147,7 @@ print("                          |___/                   |___/ ")
 print("********************************************************\n")
 
 print("********************************************************")
-print("Unthreaded Barnes-Hut Quadtree")
+print("UNTHREADED Barnes-Hut Quadtree")
 print("********************************************************\n")
 
 # Number of bodies
@@ -156,11 +159,14 @@ number_of_bodies = int(input("\nEnter the number of bodies: "))
 
 # Number of timesteps
 # Fixed amount of time by which the simulation advances/progresses.
-print("\n\n*******************")
+print("\n*******************")
 print("Timestep definition")
 print("*******************")
 print("This is the fixed amount of time by which the simulation advances")
 number_of_timesteps = int(input("\nEnter the number of timesteps: "))
+
+print("\nSimulating body movements...")
+print("Please wait...")
 
 # Theta parameter
 # This determines what is considered short and long range
@@ -169,7 +175,7 @@ number_of_timesteps = int(input("\nEnter the number of timesteps: "))
 # we treat the quadtree cell as a source of long-range gravitational forces and use its center of mass. 
 # Otherwise, we will recursively visit the child cells in the quadtree.
 # 0.5 is commonly used in practice
-theta = 0.5
+Theta = 0.5
 
 # Newton'side Gravitational Constant
 G = 6.67 / 1e11   
@@ -177,7 +183,7 @@ G = 6.67 / 1e11
 # Change in time between frames/simulation cycles (Delta time)
 # Delta time describes the time difference between the previous frame that was drawn 
 # and the current frame
-timestep = 0.01
+Timestep = 0.01
 
 # Random seed
 np.random.seed(50)
@@ -199,10 +205,10 @@ X0 = np.random.random(number_of_bodies)
 Y0 = np.random.random(number_of_bodies)
 
 # Random x momentum coordinate
-PX0 = np.random.random(number_of_bodies) - 0.5
+momentum_PX0 = np.random.random(number_of_bodies) - 0.5
 
 # Random y momentum coordinate
-PY0 = np.random.random(number_of_bodies) - 0.5
+momentum_PY0 = np.random.random(number_of_bodies) - 0.5
 
 # Create array of bodies
 # An array of bodies which have a positional x,y coordinate, momentum x, coordinate, and mass
@@ -212,15 +218,16 @@ Bodies = [
     # List of iterables which are collected into a tuple, and returned
     # This will be multiplied by the number of bodies, as specified when defining the properties of each body
     # COULD MAYBE JUST MULTIPLY THE ENTIRE TUPLE BY NUMBER OF BODIES, although may break script??
-    for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, PX0, PY0, mass)
+    for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, momentum_PX0, momentum_PY0, mass)
 ]
 
-print("\nSimulating body movements...")
 
-# Loop the function for one simulation cycle, for a number of iterations equal to the number of timesteps
-def barnes_hut_simulation_loop(number_of_timesteps):
-    for i in range(number_of_timesteps):
-        model_step(Bodies, theta, G, timestep)
+def barnes_hut_simulation_loop(n):
+    # MAIN SIMULATION LOOP 
+    # Loop the function for one simulation cycle, multiplied number of timesteps
+    for _ in range(n):
+        single_timestep_cycle(Bodies, Theta, G, Timestep)
+        
 
 print("\nCalculations complete...")
 print("\nPlease wait...")
@@ -228,8 +235,7 @@ print("\n")
 
 # Time the simulation
 result = timeit.timeit(lambda: barnes_hut_simulation_loop(number_of_timesteps), number=1)
-print("The time taken to run the Barnes-Hut Algorithm simulation with", number_of_bodies, "bodies is:")
-print(result, "s")
+print("The time taken to run the UNTHREADED Barnes-Hut Algorithm simulation with", number_of_bodies, "bodies is: ", result, "s")
 
 # Record function calls
 print("\n\n")
@@ -238,4 +244,3 @@ cProfile.run("barnes_hut_simulation_loop(number_of_timesteps)")
 # System CPU usage
 print("The overall system CPU usage is : ", psutil.cpu_percent())
 input("Press ENTER to exit")
-input()

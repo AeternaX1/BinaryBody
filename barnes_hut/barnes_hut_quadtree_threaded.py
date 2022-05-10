@@ -15,11 +15,13 @@ Barnes-Hut Algorithm
 3. Numerically integrate using your algorithm of choice. (Velocity Verlet, Euler, whatever.)
 """
 
+# THE QUADTREE USED HERE IS INSPIRED BY THE WORK OF LEWIS COLE
+# https://lewiscoleblog.com/barnes-hut
 
-# Quadtree node constructor
-# A class for a node within the quadtree.
+
+# Quadtree node constructor - A class for a node within the quadtree.
 # We use the terminology "subnode" for nodes in the next quadtree depth level
-# If a node is "childless" then it represents a body
+# If a node is contains no subnodes (children), then it represents a body
 class node:
     def __init__(self, x, y, x_momentum, y_momentum, mass):
         """
@@ -121,7 +123,7 @@ def verlet(bodies, root, theta, G, change_in_time):
 
 
 # One simulation cycle/single timestep
-def model_step(bodies, theta, g, change_in_time):
+def single_timestep_cycle(bodies, theta, g, change_in_time):
     root = None
     for body in bodies:
         body.quadrant_reposition()
@@ -130,12 +132,10 @@ def model_step(bodies, theta, g, change_in_time):
 
 
 # ********************************************************************************************
+# MAIN CODE
 
-start = time.perf_counter()
+# SIMULATION PARAMETERS
 
-""" 
-Simulation Parameters
-"""
 print("********************************************************")
 print(" ____  _                        ____            _       ")
 print("|  _ \(_)                      |  _ \          | |      ") 
@@ -148,23 +148,26 @@ print("                          |___/                   |___/ ")
 print("********************************************************\n")
 
 print("********************************************************")
-print("Barnes-Hut Quadtree")
+print("THREADED Barnes-Hut Quadtree")
 print("********************************************************\n")
 
 # Number of bodies
 print("*****************")
 print("Simulation bodies")
 print("*****************")
-print("Here, the number of bodies you wish to insert into the simualtion can be determined.")
+print("Here, the number of bodies you wish to insert into the simulation can be determined.")
 number_of_bodies = int(input("\nEnter the number of bodies: "))
 
 # Number of timesteps
 # Fixed amount of time by which the simulation advances/progresses.
-print("\n\n*******************")
+print("\n*******************")
 print("Timestep definition")
 print("*******************")
 print("This is the fixed amount of time by which the simulation advances")
-number_of_timesteps = int(input("\nEnter the number of timesteps:"))
+number_of_timesteps = int(input("\nEnter the number of timesteps: "))
+
+print("\nSimulating body movements...")
+print("Please wait...")
 
 # Theta parameter
 # This determines what is considered short and long range
@@ -173,7 +176,7 @@ number_of_timesteps = int(input("\nEnter the number of timesteps:"))
 # we treat the quadtree cell as a source of long-range gravitational forces and use its center of mass. 
 # Otherwise, we will recursively visit the child cells in the quadtree.
 # 0.5 is commonly used in practice
-theta = 0.5
+Theta = 0.5
 
 # Newton'side Gravitational Constant
 G = 6.67 / 1e11   
@@ -181,7 +184,7 @@ G = 6.67 / 1e11
 # Change in time between frames/simulation cycles (Delta time)
 # Delta time describes the time difference between the previous frame that was drawn 
 # and the current frame
-change_in_time = 0.01
+Timestep = 0.01
 
 # Random seed
 np.random.seed(50)
@@ -194,7 +197,7 @@ np.random.seed(50)
 # Keeps things fair
 # Mass property of body, multiplied by number of bodies specified by user
 # mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
-mass = 100 * np.ones((number_of_bodies, 1)) / number_of_bodies  
+mass = np.random.random(number_of_bodies)*10
 
 # Random x coordinate, multiply random x cooridinates by number of bodies specified by user
 X0 = np.random.random(number_of_bodies)
@@ -203,11 +206,10 @@ X0 = np.random.random(number_of_bodies)
 Y0 = np.random.random(number_of_bodies)
 
 # Random x momentum coordinate
-PX0 = np.random.random(number_of_bodies) - 0.5
+momentum_PX0 = np.random.random(number_of_bodies) - 0.5
 
 # Random y momentum coordinate
-PY0 = np.random.random(number_of_bodies) - 0.5
-
+momentum_PY0 = np.random.random(number_of_bodies) - 0.5
 
 # Create array of bodies
 # An array of bodies which have a positional x,y coordinate, momentum x, coordinate, and mass
@@ -217,40 +219,42 @@ Bodies = [
     # List of iterables which are collected into a tuple, and returned
     # This will be multiplied by the number of bodies, as specified when defining the properties of each body
     # COULD MAYBE JUST MULTIPLY THE ENTIRE TUPLE BY NUMBER OF BODIES, although may break script??
-    for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, PX0, PY0, mass)
+    for (x0, y0, pX0, pY0, mass) in zip(X0, Y0, momentum_PX0, momentum_PY0, mass)
 ]
 
-# Main Model Loop for Barnes Hut
-# Loop the function for one simulation cycle, for a number of iterations equal to the number of timesteps
-def barnes_hut_simulation_loop(number_of_timesteps):
-    # Create a number of threads equal to the number of timesteps
-    threads = []
 
-    for i in range(number_of_timesteps):
-        t1 = threading.Thread(target=model_step, args=(Bodies, theta, G, change_in_time))
-        threads.append(i)
-        t1.start()
-        model_step(Bodies, theta, G, change_in_time)
+def barnes_hut_simulation_loop(n):
+    # MAIN SIMULATION LOOP 
+    # Loop the function for one simulation cycle, multiplied number of timesteps
     
+    # Create a number of threads equal to the number of timesteps.
+    # Threads will be stored in this list to avoid start and joining every thread manually
+    # If threads were not stored in this way, problem could occur with larger simulations that contain
+    # more bodies
+    threads = []
+    
+    # Simulation Main Loop
+    for i in range(n):
+        # Create and Start Thread
+        t1 = threading.Thread(target=single_timestep_cycle, args=(Bodies, Theta, G, Timestep))
+        threads.append(t1)
+        t1.start()
+
     # Active threads
     print(f'Active Threads: {threading.active_count()}')
-    
+    print("Please wait...")
+
     for t in threads:
         t1.join()
+        
 
-
-end = time.perf_counter()
-
-# Initialise
-print("\nRunning...")
+print("\nCalculations complete...")
+print("\nPlease wait...")
+print("\n")
 
 # Time the simulation
 result = timeit.timeit(lambda: barnes_hut_simulation_loop(number_of_timesteps), number=1)
-print("The time taken to run the Barnes-Hut Algorithm simulation with", number_of_bodies, "bodies is:")
-print(result, "s")
-
-# Entire program execution time
-print(f"\n\nThe time taken to execute the entire program is {round(end-start, 2)} second(s)") 
+print("The time taken to run the THREADED Barnes-Hut Algorithm simulation with", number_of_bodies, "bodies is: ", result, "s")
 
 # Record function calls
 print("\n\n")

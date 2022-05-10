@@ -40,13 +40,18 @@ Newton's Law of Universal Gravitation - every object feels an acceleration
 """
 
 
-def get_acceleration(position, mass, G, softening):
+# THE PAIRWISE ALGORITHM USED HERE IS INSPIRED BY THE WORK OF PHILIP MOCZ
+# https://github.com/pmocz/nbody-python
 
+
+def get_acceleration(position, mass, G, softening):
     # Give dimensions of the array
     # The array will represent the matrix
     N = position.shape[0]
 
     # Return an array of the given size, filled with zeroes
+    # Filled with zeroes for now, the accelerations for each body will be inserted into this array
+    # and it will be updated
     acceleration = np.zeros((N,3))
 
     # Loop through 2D Array for every body
@@ -61,7 +66,6 @@ def get_acceleration(position, mass, G, softening):
             # Inverse square law
             # Softening is the number added to avoid issues when two bodies are close to one another
             # If not added, the acceleration can go to infinity
-            # inverse = (x**2 + y**2 + z**2 + softening**2)**(-1.5)
             inverse = math.pow(math.pow(x, 2) + math.pow(y, 2) + math.pow(z, 2) + math.pow(softening, 2), -1.5)
 
             acceleration[i,0] +=  G * (x * inverse) * mass[j]
@@ -70,10 +74,10 @@ def get_acceleration(position, mass, G, softening):
 
     return acceleration
 
-"""
-Simulation Parameters
-"""
-start = time.perf_counter()
+# ********************************************************************************************
+# MAIN CODE
+
+# SIMULATION PARAMETERS
 
 print("********************************************************")
 print(" ____  _                        ____            _       ")
@@ -87,7 +91,7 @@ print("                          |___/                   |___/ ")
 print("********************************************************\n")
 
 print("********************************************************")
-print("Threaded Pairwise Interaction")
+print("THREADED Pairwise Interaction")
 print("********************************************************\n")
 
 # Number of bodies
@@ -96,16 +100,17 @@ print("Simulation bodies")
 print("*****************")
 print("Here, the number of bodies you wish to insert into the simulation can be determined.")
 number_of_bodies = int(input("\nEnter the number of bodies: "))
-# number_of_bodies = 100
 
 # Number of timesteps
 # Fixed amount of time by which the simulation advances/progresses.
-print("\n\n*******************")
+print("\n*******************")
 print("Timestep definition")
 print("*******************")
 print("This is the fixed amount of time by which the simulation advances")
 number_of_timesteps = int(input("\nEnter the number of timesteps: "))
-# number_of_timesteps = 100
+
+print("\nSimulating body movements...")
+print("Please wait...")
 
 # Timestep
 timestep = 0.01   
@@ -139,9 +144,8 @@ acceleration = get_acceleration(position, mass, G, softening)
 # more bodies
 threads = []
 
-print("\nSimulating body movements...")
-
-# Simulation Main Loop
+# MAIN SIMULATION LOOP 
+# Loop the function for one simulation cycle, multiplied number of timesteps
 for i in range(number_of_timesteps):
     # Create and Start Thread
     t1 = threading.Thread(target=get_acceleration, args=(position, mass, G, softening))
@@ -149,16 +153,17 @@ for i in range(number_of_timesteps):
     t1.start()
 
     # Half timestep kick
-    velocity += acceleration * timestep / 2.0
+    velocity += (acceleration * timestep) / 2
 
     # Full timestep drift
     position += velocity * timestep
     
     # Half timestep kick
-    velocity += acceleration * timestep / 2.0
+    velocity += (acceleration * timestep) / 2
 
 # Active threads
 print(f'Active Threads: {threading.active_count()}')
+print("Please wait...")
 
 # Join all threads with main thread
 for t in threads:
@@ -168,16 +173,15 @@ print("\nCalculations complete...")
 print("\nPlease wait...")
 print("\n")
 
-# Time the get_acceleration() fucntion's execution time
+# Time the get_acceleration() function's execution time
 result = timeit.timeit(lambda: get_acceleration(position, mass, G, softening), number=1)
-print("The time taken to run the Pairwise Interaction simulation with", number_of_bodies, "bodies is: ")
+print("The time taken to run the THREADED Pairwise Interaction simulation with", number_of_bodies, "bodies is: ")
 print(result, "s")
 
-# # Record function calls
-# print("\n")
-# cProfile.run("get_acceleration(position, mass, G, softening)")
+# Record function calls
+print("\n")
+cProfile.run("get_acceleration(position, mass, G, softening)")
 
-# # System CPU usage
-# print("The overall system CPU usage is : ", psutil.cpu_percent())
-# input("Press ENTER to exit")
-input()
+# System CPU usage
+print("The overall system CPU usage is : ", psutil.cpu_percent())
+input("Press ENTER to exit")

@@ -1,2 +1,2 @@
 cd venv/Scripts
-start activate.bat && start python ../../pairwise/pairwise_non_vectorized_threaded.py
+start activate.bat && start python ../../barnes_hut/barnes_hut_quadtree_threaded.py
