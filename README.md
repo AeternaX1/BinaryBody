@@ -41,7 +41,7 @@
   If the user wishes to run another simulation, they will need to execute main.py again.
   
   ### DEACTIVATE VENV
-  Once the user is done, execute main.py again and select option "3" to deactivate the virtual environment (venv).
+  Once the user is done, execute main.py again and select option "5" to deactivate the virtual environment (venv).
 
   ### THINGS TO NOTE
   While main.py needs to be executed every time the user wants to run a new simulation, which activates the virtual environment (venv), as well as when they want to deactivate the virtual environment (venv), this is to avoid using "while(1)" to keep the script active. This is because it is not advisable to use it in real-world scenarios because it increases the CPU usage while also potentially blocking the code.
