@@ -71,7 +71,7 @@ If the user wishes to run another simulation, they will need to execute main.py 
 ***************   
 DEACTIVATE VENV
 ***************  
-Once the user is done, execute main.py again and select option "3" to deactivate the virtual environment (venv).
+Once the user is done, execute main.py again and select option "5" to deactivate the virtual environment (venv).
 
 
 **************
