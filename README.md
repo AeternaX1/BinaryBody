@@ -15,9 +15,12 @@ Run "main.py"
 If main.py is running into any issues regarding the libraries installed to the venv, you may need to re-install them from "requirements.txt". This can be done via the following:
 
 Install libraries from requirements.txt
-    pip install -r requirements.txt
+
+        pip install -r requirements.txt
+        
 If this doesn't work, use this.
-    pip3 install -r requirements.txt
+
+        pip3 install -r requirements.txt
   
 ### CHOOSE YOUR SIMULATION
 When this is done, you can choose to run either the:<br>
@@ -27,7 +30,9 @@ UNTHREADED Barnes-Hut Quadtree simulation by selecting option "3"<br>
 THREADED Barnes-Hut Quadtree simulation by selecting option "4"<br>
 
 ### VENV ACTIVATION
-Both simulations when executed will activate the virtual environment (venv) contained within "venv/Scripts/activate.bat"
+Both simulations when executed will activate the virtual environment (venv) contained within:
+        
+        venv/Scripts/activate.bat
 
 ### UPON EXECUTION OF THE CHOSEN SIMULATION
 When the Pairwise or Barnes-Hut simulations are executed, the venv will activate. 
