@@ -10,7 +10,9 @@ The application is built in Python 3.9, is CLI-based and allows the user to comp
 ## GET STARTED
 
 ### RUN YOUR FIRST SIMULATION
-Run "main.py"
+Run the following script:
+
+        main.py
 
 If main.py is running into any issues regarding the libraries installed to the venv, you may need to re-install them from "requirements.txt". This can be done via the following:
 
